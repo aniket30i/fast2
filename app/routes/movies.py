@@ -20,12 +20,12 @@ def show_movies_list(
         db:Session=Depends(get_db),
         current_user=Depends(get_current_user)
 ):
-    return movies_services.get_movies(db,skip=skip,limit=limit,title=title,year=year)
+    return movies_services.get_movies(db,skip=skip,limit=limit,title=title,year=year,owner_id=current_user)
 
 @router.post("/add_movie")
-def add_movie(movie:MovieModel,db:Session=Depends(get_db)):
+def add_movie(movie:MovieModel,db:Session=Depends(get_db),current_user=Depends(get_current_user)):
     try:
-        return add_movies(db,movie.title,movie.year)
+        return add_movies(db,movie.title,movie.year,current_user)
     except ValueError as e:
         raise HTTPException(status_code=400,detail=str(e))
 

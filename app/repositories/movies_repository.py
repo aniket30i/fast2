@@ -3,8 +3,8 @@ from app.models.movies import Movies
 from app.schemas.movies import MovieModel
 from app.schemas.movies import MovieUpdateModel
 
-def get_all_movies(db:Session,skip:int,limit:int,title:str | None , year:int | None):
-    query = db.query(Movies)
+def get_all_movies(db:Session,skip:int,limit:int,title:str | None , year:int | None , owner_id:int):
+    query = db.query(Movies).filter(Movies.owner_id==owner_id)
 
     if title:
         query = query.filter(Movies.title.ilike(f'%{title}%'))
@@ -12,7 +12,7 @@ def get_all_movies(db:Session,skip:int,limit:int,title:str | None , year:int | N
     if year:
         query = query.filter(Movies.year==year)
 
-    return db.query(Movies).offset(skip).limit(limit).all()
+    return query.offset(skip).limit(limit).all()
 
 def exists(db:Session,title:str)->bool:
     return db.query(Movies).filter(Movies.title==title).first() is not None
@@ -21,8 +21,8 @@ def get_by_id(db:Session, movie_id:int):
     return db.query(Movies).filter(Movies.id == movie_id).first()
 
 
-def add_movie(db:Session,title:str,year:int):
-    movie = Movies(year=year,title=title)
+def add_movie(db:Session,title:str,year:int,owner_id:int):
+    movie = Movies(year=year,title=title,owner_id=owner_id)
     db.add(movie)
     db.commit()
     db.refresh(movie)
