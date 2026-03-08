@@ -6,4 +6,4 @@ class Movies(Base):
 
     id = Column(Integer,primary_key=True,index=True)
     title = Column(String(100),unique=True,nullable=True)
-    year = Column(String(100),unique=True,nullable=True)
+    year = Column(Integer,nullable=True)

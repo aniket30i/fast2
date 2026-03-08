@@ -1,17 +1,26 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from app.core.current_user import get_current_user
 from app.db.deps import get_db
 from app.schemas.movies import MovieModel
 from app.services.movies_services import add_movies
 from app.services import movies_services
 from app.schemas.movies import MovieUpdateModel
-
+from typing import Optional
+from app.core.current_user import get_current_user
 
 router = APIRouter(prefix="/movies",tags=["Movies"])
 
 @router.get("/show_movies_list")
-def show_movies_list(db:Session=Depends(get_db)):
-    return movies_services.get_all_movies(db)
+def show_movies_list(
+        skip: int = 0,
+        limit: int = 10,
+        title:Optional[str] = None,
+        year:Optional[int] = None,
+        db:Session=Depends(get_db),
+        current_user=Depends(get_current_user)
+):
+    return movies_services.get_movies(db,skip=skip,limit=limit,title=title,year=year)
 
 @router.post("/add_movie")
 def add_movie(movie:MovieModel,db:Session=Depends(get_db)):

@@ -3,13 +3,8 @@ from sqlalchemy.orm import Session
 from app.schemas.movies import MovieUpdateModel
 
 
-def get_all_movies(db):
-    movies = movies_repository.get_all_movies(db)
-
-    if not movies:
-        return []
-
-    return movies
+def get_movies(db: Session, skip: int, limit: int, title: str | None, year: int | None):
+    return movies_repository.get_all_movies(db, skip, limit, title, year)
 
 def add_movies(db:Session,title,year):
     if not title:

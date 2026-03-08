@@ -3,8 +3,16 @@ from app.models.movies import Movies
 from app.schemas.movies import MovieModel
 from app.schemas.movies import MovieUpdateModel
 
-def get_all_movies(db:Session):
-    return db.query(Movies).all()
+def get_all_movies(db:Session,skip:int,limit:int,title:str | None , year:int | None):
+    query = db.query(Movies)
+
+    if title:
+        query = query.filter(Movies.title.ilike(f'%{title}%'))
+
+    if year:
+        query = query.filter(Movies.year==year)
+
+    return db.query(Movies).offset(skip).limit(limit).all()
 
 def exists(db:Session,title:str)->bool:
     return db.query(Movies).filter(Movies.title==title).first() is not None
