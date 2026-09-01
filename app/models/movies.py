@@ -9,4 +9,5 @@ class Movies(Base):
     title = Column(String(100),unique=True,nullable=True)
     year = Column(Integer,nullable=True)
     owner_id = Column(Integer,ForeignKey("users.id"))
+    rating = Column(Integer,nullable=True)
 

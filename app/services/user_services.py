@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from app.repositories import user_repository
 from app.core.security import hash_password
 
-def register_user(db:Session, email:str , password:str):
+async def register_user(db:Session, email:str , password:str):
 
     existing = user_repository.get_user_by_email(db,email)
 

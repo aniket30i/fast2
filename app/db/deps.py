@@ -1,9 +1,6 @@
-from app.db.database import SessionLocal
+from app.db.database import AsyncSessionLocal
 from sqlalchemy.orm import Session
 
-def get_db():
-    db=SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session

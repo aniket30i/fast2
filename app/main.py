@@ -5,7 +5,7 @@ from app.models.users import User
 from app.models import movies
 from app.routes import auth
 
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Movies Storage")
 app.include_router(movies_router)

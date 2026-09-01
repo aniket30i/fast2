@@ -1,10 +1,14 @@
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.users import User
 
-def get_user_by_email(db:Session,email: str):
-    return db.query(User).filter(User.email == email).first()
+async def get_user_by_email(db: AsyncSession, email: str):
+    result = await db.execute(
+        select(User).where(User.email == email)
+    )
+    return result.scalars().first()
 
-def create_user(db:Session,username: str, hashed_password: str):
+async def create_user(db:AsyncSession,username: str, hashed_password: str):
 
     new_user = User(
         email=username,
@@ -12,8 +16,8 @@ def create_user(db:Session,username: str, hashed_password: str):
     )
 
     db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    await db.commit()
+    await db.refresh(new_user)
 
     return new_user
 

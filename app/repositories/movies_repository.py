@@ -1,52 +1,75 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from app.models.movies import Movies
-from app.schemas.movies import MovieModel
 from app.schemas.movies import MovieUpdateModel
 
-def get_all_movies(db:Session,skip:int,limit:int,title:str | None , year:int | None , owner_id:int):
-    query = db.query(Movies).filter(Movies.owner_id==owner_id)
+
+async def get_all_movies(
+    db: AsyncSession,
+    skip: int,
+    limit: int,
+    title: str | None,
+    year: int | None,
+    owner_id: int
+):
+    query = select(Movies).where(Movies.owner_id == owner_id)
 
     if title:
-        query = query.filter(Movies.title.ilike(f'%{title}%'))
+        query = query.where(Movies.title.ilike(f"%{title}%"))
 
     if year:
-        query = query.filter(Movies.year==year)
+        query = query.where(Movies.year == year)
 
-    return query.offset(skip).limit(limit).all()
+    query = query.offset(skip).limit(limit)
 
-def exists(db:Session,title:str)->bool:
-    return db.query(Movies).filter(Movies.title==title).first() is not None
-
-def get_by_id(db:Session, movie_id:int):
-    return db.query(Movies).filter(Movies.id == movie_id).first()
+    result = await db.execute(query)
+    return result.scalars().all()
 
 
-def add_movie(db:Session,title:str,year:int,owner_id:int):
-    movie = Movies(year=year,title=title,owner_id=owner_id)
+async def exists(db: AsyncSession, title: str) -> bool:
+    result = await db.execute(
+        select(Movies).where(Movies.title == title)
+    )
+    return result.scalars().first() is not None
+
+
+async def get_by_id(db: AsyncSession, movie_id: int):
+    result = await db.execute(
+        select(Movies).where(Movies.id == movie_id)
+    )
+    return result.scalars().first()
+
+
+async def add_movie(db: AsyncSession, title: str, year: int, owner_id: int):
+    movie = Movies(year=year, title=title, owner_id=owner_id)
+
     db.add(movie)
-    db.commit()
-    db.refresh(movie)
+    await db.commit()
+    await db.refresh(movie)
+
     return movie
 
-def update_movie(db:Session, payload:MovieUpdateModel,movie:Movies):
+
+async def update_movie(db: AsyncSession, payload: MovieUpdateModel, movie: Movies):
     for key, value in payload.model_dump(exclude_unset=True).items():
-        setattr(movie,key,value)
+        setattr(movie, key, value)
 
-    db.commit()
-    db.refresh(movie)
+    await db.commit()
+    await db.refresh(movie)
+
     return movie
 
-def delete_movie(db:Session,movie_id:int):
-    movie = db.query(Movies).filter(Movies.id == movie_id).first()
+
+async def delete_movie(db: AsyncSession, movie_id: int):
+    result = await db.execute(
+        select(Movies).where(Movies.id == movie_id)
+    )
+    movie = result.scalars().first()
 
     if not movie:
         return None
 
-    db.delete(movie)
-    db.commit()
+    await db.delete(movie)
+    await db.commit()
+
     return movie
-
-
-
-
-
