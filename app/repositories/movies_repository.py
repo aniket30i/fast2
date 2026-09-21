@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.models.movies import Movies
+from app.models.movies import Movies,Genre
 from app.schemas.movies import MovieUpdateModel
 
 
@@ -25,6 +25,13 @@ async def get_all_movies(
     result = await db.execute(query)
     return result.scalars().all()
 
+async def get_movies_by_genre(db: AsyncSession, genre: str,skip:int, limit:int, owner_id: int):
+    query = select(Movies).join(Movies.genres).where(Genre.name == genre, Movies.owner_id == owner_id)
+    query = query.offset(skip).limit(limit)
+
+    result = await db.execute(query)
+    return result.scalars().all()
+
 
 async def exists(db: AsyncSession, title: str) -> bool:
     result = await db.execute(
@@ -33,9 +40,12 @@ async def exists(db: AsyncSession, title: str) -> bool:
     return result.scalars().first() is not None
 
 
-async def get_by_id(db: AsyncSession, movie_id: int):
+async def get_by_id(db: AsyncSession, movie_id: int, owner_id: int):
     result = await db.execute(
-        select(Movies).where(Movies.id == movie_id)
+        select(Movies).where(
+            Movies.id == movie_id,
+            Movies.owner_id == owner_id,
+        )
     )
     return result.scalars().first()
 
@@ -60,9 +70,12 @@ async def update_movie(db: AsyncSession, payload: MovieUpdateModel, movie: Movie
     return movie
 
 
-async def delete_movie(db: AsyncSession, movie_id: int):
+async def delete_movie(db: AsyncSession, movie_id: int, owner_id: int):
     result = await db.execute(
-        select(Movies).where(Movies.id == movie_id)
+        select(Movies).where(
+            Movies.id == movie_id,
+            Movies.owner_id == owner_id,
+        )
     )
     movie = result.scalars().first()
 

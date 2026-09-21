@@ -7,6 +7,14 @@ class StrictBaseModel(BaseModel):
 class MovieModel(StrictBaseModel):
     title:str
     year:int
+    genres:list[str] = []
+
+class MovieResponse(StrictBaseModel):
+    id: int
+    title:str
+    year:int
+    genres:list[str]
+    owner_id: int
 
 class MovieUpdateModel(StrictBaseModel):
     title:Optional[str]=None

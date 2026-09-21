@@ -10,7 +10,7 @@ load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://postgres:postgres123@localhost:5432/movies"
+    "postgresql+asyncpg://postgres:main@localhost:5432/movies"
 )
 engine = create_async_engine(DATABASE_URL,echo=True)
 

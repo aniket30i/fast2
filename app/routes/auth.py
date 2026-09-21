@@ -20,11 +20,14 @@ async def register(
     user: UserCreate,
     db: AsyncSession = Depends(get_db)
 ):
-    return await user_services.register_user(
-        db,
-        user.email,
-        user.password
-    )
+    try:
+        return await user_services.register_user(
+            db,
+            user.email,
+            user.password
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
 
 
 @router.post("/login")

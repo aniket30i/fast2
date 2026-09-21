@@ -1,12 +1,15 @@
 from app.repositories import movies_repository
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.movies import MovieUpdateModel
 
 
-async def get_movies(db: Session, skip: int, limit: int, title: str | None, year: int | None,owner_id:int):
+async def get_movies(db: AsyncSession, skip: int, limit: int, title: str | None, year: int | None,owner_id:int):
     return await movies_repository.get_all_movies(db, skip, limit, title, year,owner_id)
 
-async def add_movies(db:Session,title,year,user_id):
+async def get_movies_by_genre(db:AsyncSession, genre:str, skip:int, limit:int, owner_id:int):
+    return await movies_repository.get_movies_by_genre(db, genre, skip, limit, owner_id)
+
+async def add_movies(db: AsyncSession, title, year, user_id):
     if not title:
         raise ValueError("Movie title cannot be empty")
     if await movies_repository.exists(db,title):
@@ -14,14 +17,16 @@ async def add_movies(db:Session,title,year,user_id):
 
     return await movies_repository.add_movie(db,title,year,user_id)
 
-async def update_movies(db:Session,movie_id:int,payload:MovieUpdateModel):
-    movie=movies_repository.get_by_id(db,movie_id)
+async def update_movies(
+    db: AsyncSession, movie_id: int, payload: MovieUpdateModel, owner_id: int
+):
+    movie = await movies_repository.get_by_id(db, movie_id, owner_id)
 
     if not movie:
-        raise ValueError("Movie does not exist with the id")
+        return None
 
     return await movies_repository.update_movie(db,payload,movie)
 
-async def delete_movie(db:Session,movie_id:int):
-    return await movies_repository.delete_movie(db,movie_id)
+async def delete_movie(db: AsyncSession, movie_id: int, owner_id: int):
+    return await movies_repository.delete_movie(db, movie_id, owner_id)
 
