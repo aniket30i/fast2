@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.current_user import get_current_user
 from app.db.deps import get_db
-from app.schemas.movies import MovieModel, MovieUpdateModel
+from app.schemas.movies import MovieModel, MovieUpdateModel, GenresModel, GenreResponse, GenresUpdateModel, GenreCreate
 from app.services import movies_services
 from app.services.movies_services import add_movies
 
@@ -17,6 +17,7 @@ async def show_movies_list(
     limit: int = 10,
     title: Optional[str] = None,
     year: Optional[int] = None,
+    genre: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
@@ -56,12 +57,29 @@ async def add_movie(
             db,
             movie.title,
             movie.year,
-            movie.genre,
+            movie.genres,
             current_user
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.post("/genres", response_model=GenreResponse)
+async def create_genre(
+    genre: GenreCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    try:
+        return await movies_services.add_genre(db, genre.name)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/genres", response_model=list[GenreResponse])
+async def list_genres(
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    return await movies_services.get_genres(db)
 
 @router.put("/update_movie/{movie_id}")
 async def movie_details_update(

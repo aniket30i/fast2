@@ -19,3 +19,21 @@ class MovieResponse(StrictBaseModel):
 class MovieUpdateModel(StrictBaseModel):
     title:Optional[str]=None
     year:Optional[int]=None
+
+class GenresModel(StrictBaseModel):
+    id: int
+    name:str
+    movies:list[MovieModel]
+
+class GenreCreate(StrictBaseModel):
+    name: str
+
+class GenreResponse(StrictBaseModel):
+    id: int
+    name: str
+    model_config = ConfigDict(from_attributes=True)
+
+class GenresUpdateModel(StrictBaseModel):
+    name:str
+    movies:list[MovieModel]
+
