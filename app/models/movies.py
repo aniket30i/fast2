@@ -24,5 +24,19 @@ class Movies(Base):
     year = Column(Integer, nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
     rating = Column(Integer, nullable=True)
+
+    director_id = Column(Integer, ForeignKey("directors.id"), nullable=True)
+    director = relationship("Director", back_populates="movies")
     
     genres = relationship("Genre", secondary=movie_genres, back_populates="movies")
+
+
+
+
+class Director(Base):
+    __tablename__ = "directors"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), unique=True, nullable=False)
+
+    movies = relationship("Movies", back_populates="director")
+

@@ -8,6 +8,7 @@ class MovieModel(StrictBaseModel):
     title:str
     year:int
     genres:list[str] = []
+    director: Optional[str]
 
 class MovieResponse(StrictBaseModel):
     id: int
@@ -35,5 +36,22 @@ class GenreResponse(StrictBaseModel):
 
 class GenresUpdateModel(StrictBaseModel):
     name:str
+    movies:list[MovieModel]
+
+class DirectorModel(StrictBaseModel):
+    id: int
+    name:str
+    movies:list[MovieModel]
+
+class DirectorCreate(StrictBaseModel):
+    name: str
+
+class DirectorResponse(StrictBaseModel):
+    id: int
+    name: str
+    model_config = ConfigDict(from_attributes=True)
+
+class DirectorUpdateModel(StrictBaseModel):
+    name: str
     movies:list[MovieModel]
 

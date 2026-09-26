@@ -9,7 +9,7 @@ from app.db.database import Base
 import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine
 from app.models.users import User
-from app.models.movies import Movies, Genre, movie_genres
+from app.models.movies import Movies, Genre, movie_genres , Director
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
