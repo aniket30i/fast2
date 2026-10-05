@@ -20,6 +20,8 @@ class MovieResponse(StrictBaseModel):
 class MovieUpdateModel(StrictBaseModel):
     title:Optional[str]=None
     year:Optional[int]=None
+    genres:Optional[list[str]]=None
+    director:Optional[str]=None
 
 class GenresModel(StrictBaseModel):
     id: int

@@ -88,7 +88,43 @@ async def add_movie(db: AsyncSession, title: str, year: int, genres: list[str], 
     return movie
 
 async def update_movie(db: AsyncSession, payload: MovieUpdateModel, movie: Movies):
-    for key, value in payload.model_dump(exclude_unset=True).items():
+    data = payload.model_dump(exclude_unset=True)
+
+    # Many-to-Many: clear the junction rows and re-resolve the supplied genres.
+    # `genres` is a lazy relationship, so it must be loaded before it is touched
+    # in an async session.
+    if "genres" in data:
+        await db.refresh(movie, attribute_names=["genres"])
+        movie.genres.clear()
+
+        for genre_name in data.pop("genres") or []:
+            result = await db.execute(select(Genre).where(Genre.name == genre_name))
+            genre_obj = result.scalars().first()
+
+            if genre_obj is None:
+                genre_obj = Genre(name=genre_name)
+                db.add(genre_obj)
+
+            movie.genres.append(genre_obj)
+
+    # One-to-Many: resolve (or create) the director and reassign the relation.
+    if "director" in data:
+        director_name = data.pop("director")
+
+        if director_name:
+            result = await db.execute(select(Director).where(Director.name == director_name))
+            director_obj = result.scalars().first()
+
+            if director_obj is None:
+                director_obj = Director(name=director_name)
+                db.add(director_obj)
+
+            movie.director = director_obj
+        else:
+            movie.director = None
+
+    # Scalar fields (title, year, ...).
+    for key, value in data.items():
         setattr(movie, key, value)
 
     await db.commit()
